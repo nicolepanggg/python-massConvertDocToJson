@@ -3,6 +3,7 @@ from fileinput import filename
 from pathlib import Path
 import json
 import shutil
+import re
 from docx import Document
 from docx.oxml.ns import qn
 import mimetypes
@@ -18,6 +19,10 @@ all_documents = []
 success_count = 0
 fail_count    = 0
 story_counter = 1
+
+def remove_s_suffix(text):
+    """Remove _S or _s from text"""
+    return re.sub(r'_[Ss]', '', text)
 
 def is_heading_style(style_name):
     name_lower = style_name.lower()
@@ -83,9 +88,9 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                 story_counter += 1
 
             all_documents.append({
-                "filename": docx_file.name,
+                "filename": remove_s_suffix(docx_file.name),
                 "icon":    thumb_path,
-                "title":    group["title"],
+                "title":    remove_s_suffix(group["title"]),
                 "description": "",
                 "button":   "",
                 "content":  group["content"]
@@ -127,9 +132,9 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                         story_counter += 1
 
                     all_documents.append({
-                        "filename": docx_file.name,
+                        "filename": remove_s_suffix(docx_file.name),
                         "icon":    thumb_path,
-                        "title":    docx_file.stem,
+                        "title":    remove_s_suffix(docx_file.stem),
                         "description": "",
                         "button":   "",
                         "content":  "<br/>".join(pending_content_parts)
@@ -174,9 +179,9 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                 story_counter += 1
 
             all_documents.append({
-                "filename": docx_file.name,
+                "filename": remove_s_suffix(docx_file.name),
                 "icon":    thumb_path,
-                "title":    docx_file.stem,
+                "title":    remove_s_suffix(docx_file.stem),
                 "description": "",
                 "button":   "",
                 "content":  "<br/>".join(pending_content_parts)
