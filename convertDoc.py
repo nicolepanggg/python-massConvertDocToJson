@@ -1,4 +1,5 @@
 # bulk_docx_to_single_json_simplified.py
+from fileinput import filename
 from pathlib import Path
 import json
 import shutil
@@ -6,12 +7,12 @@ from docx import Document
 from docx.oxml.ns import qn
 import mimetypes
 
-source_folder = Path(r"D:\2026\convertDocToJson\docx")
+source_folder = Path(r"D:\2026Project\python-massConvertDocToJson\docx")
 output_json   = Path("paragraphs.json")
-images_folder = Path("images")
-thumb_folder  = Path("thumb")
-images_folder.mkdir(exist_ok=True)
-thumb_folder.mkdir(exist_ok=True)
+images_folder = Path("images/stories")
+thumb_folder  = Path("images/stories/thumb")
+images_folder.mkdir(parents=True, exist_ok=True)
+thumb_folder.mkdir(parents=True, exist_ok=True)
 
 all_documents = []
 success_count = 0
@@ -46,7 +47,7 @@ def extract_images_from_para(para, doc, safe_stem, img_counter):
 
             img_filename = f"{safe_stem}_圖片{img_counter}{ext}"
             (images_folder / img_filename).write_bytes(img_bytes)
-            img_tags.append((f'<div><img src="images/{img_filename}"/></div>', images_folder / img_filename))
+            img_tags.append((f'<div><img src="/images/stories/{img_filename}"/></div>', images_folder / img_filename))
             img_counter += 1
         except Exception:
             continue
@@ -78,13 +79,15 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                 ext        = doc_first_image_path.suffix
                 thumb_name = f"story_{story_counter:02d}{ext}"
                 shutil.copy2(doc_first_image_path, thumb_folder / thumb_name)
-                thumb_path = f"/thumb/{thumb_name}"
+                thumb_path = f"/images/stories/thumb/{thumb_name}"
                 story_counter += 1
 
             all_documents.append({
-                "image":    thumb_path,
                 "filename": docx_file.name,
+                "icon":    thumb_path,
                 "title":    group["title"],
+                "description": "",
+                "button":   "",
                 "content":  group["content"]
             })
 
@@ -120,7 +123,7 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                         ext        = doc_first_image_path.suffix
                         thumb_name = f"story_{story_counter:02d}{ext}"
                         shutil.copy2(doc_first_image_path, thumb_folder / thumb_name)
-                        thumb_path = f"/thumb/{thumb_name}"
+                        thumb_path = f"/images/stories/thumb/{thumb_name}"
                         story_counter += 1
 
                     all_documents.append({
@@ -167,13 +170,15 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                 ext        = doc_first_image_path.suffix
                 thumb_name = f"story_{story_counter:02d}{ext}"
                 shutil.copy2(doc_first_image_path, thumb_folder / thumb_name)
-                thumb_path = f"/thumb/{thumb_name}"
+                thumb_path = f"/images/stories/thumb/{thumb_name}"
                 story_counter += 1
 
             all_documents.append({
-                "image":    thumb_path,
                 "filename": docx_file.name,
+                "icon":    thumb_path,
                 "title":    docx_file.stem,
+                "description": "",
+                "button":   "",
                 "content":  "<br/>".join(pending_content_parts)
             })
             section_count += 1
