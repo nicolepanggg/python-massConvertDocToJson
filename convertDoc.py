@@ -124,9 +124,11 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                         story_counter += 1
 
                     all_documents.append({
-                        "image":    thumb_path,
                         "filename": docx_file.name,
+                        "icon":    thumb_path,
                         "title":    docx_file.stem,
+                        "description": "",
+                        "button":   "",
                         "content":  "<br/>".join(pending_content_parts)
                     })
                     section_count += 1
