@@ -137,29 +137,29 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                         "title":    remove_s_suffix(docx_file.stem),
                         "description": "",
                         "button":   "",
-                        "content":  "<br/>".join(pending_content_parts)
+                        "content":  ''.join(pending_content_parts)
                     })
                     section_count += 1
                     pending_content_parts = []
 
                 current_group = {
                     "title":   text,
-                    "content": "<br/>".join(img_tag_strings)
+                    "content": ''.join(img_tag_strings)
                 }
 
             else:
                 parts = []
                 if text:
-                    parts.append(text)
+                    parts.append(f'<p>{text}</p>')
                 parts.extend(img_tag_strings)
-                combined = "<br/>".join(parts)
+                combined = ''.join(parts)
 
                 if not combined:
                     continue
 
                 if current_group is not None:
                     if current_group["content"]:
-                        current_group["content"] += "<br/>" + combined
+                        current_group["content"] += combined
                     else:
                         current_group["content"] = combined
                 else:
@@ -184,7 +184,7 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
                 "title":    remove_s_suffix(docx_file.stem),
                 "description": "",
                 "button":   "",
-                "content":  "<br/>".join(pending_content_parts)
+                "content":  ''.join(pending_content_parts)
             })
             section_count += 1
 
@@ -195,10 +195,26 @@ for docx_file in sorted(source_folder.rglob("*.docx")):
         fail_count += 1
         print(f"× 失敗 {docx_file.name}: {e}")
 
-final_output = {"documents": all_documents}
+def format_value(v):
+    if isinstance(v, str):
+        return f'"{v}"'
+    elif v is None:
+        return 'null'
+    else:
+        return str(v)
+
+def format_doc(doc):
+    lines = ['    {']
+    for key, value in doc.items():
+        lines.append(f'      {key}: {format_value(value)},')
+    lines[-1] = lines[-1].rstrip(',')  # remove comma from last
+    lines.append('    }')
+    return '\n'.join(lines)
+
+final_output = '{\n  "documents": [\n' + ',\n'.join(format_doc(doc) for doc in all_documents) + '\n  ]\n}'
 
 with open(output_json, "w", encoding="utf-8") as f:
-    json.dump(final_output, f, ensure_ascii=False, indent=2)
+    f.write(final_output)
 
 print(f"\n完成！成功：{success_count}　失敗：{fail_count}")
 print(f"輸出檔：{output_json}")
